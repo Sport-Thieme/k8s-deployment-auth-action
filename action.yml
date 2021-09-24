@@ -1,0 +1,35 @@
+# action.yml
+name: 'Authentication 🔑'
+description: 'Authenticate everything that is needed for our ArgoCD GitOps deployment flow'
+inputs:
+  awsRegion:
+    description: 'AWS Region identifier (defaults to eu-west-1)'
+    default: 'eu-west-1'
+    required: false
+  awsAccessKeyId:
+    description: 'AWS Access Key identifier'
+    required: true
+  awsSecretAccessKey:
+    description: 'AWS Secret Access Key identifier'
+    required: true
+  sshPrivateKey:
+    description: 'SSH Private Key'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: AWS Credentials
+      uses: aws-actions/configure-aws-credentials@b9d67c7f135b553d376395a35efe37bc1bf869a6
+      with:
+        aws-access-key-id: ${{ inputs.awsAccessKeyId }}
+        aws-secret-access-key: ${{ inputs.awsSecretAccessKey }}
+        aws-region: ${{ inputs.awsRegion }}
+
+    - name: AWS ECR Login
+      uses: aws-actions/amazon-ecr-login@586a0e54776024453a6371fc5463c66efa7420d9
+
+    - name: GitHub SSH
+      uses: webfactory/ssh-agent@a652a400f29bd5fa7dfb8f1951c1dfe746d5b07b
+      with:
+        ssh-private-key: ${{ inputs.sshPrivateKey }}
